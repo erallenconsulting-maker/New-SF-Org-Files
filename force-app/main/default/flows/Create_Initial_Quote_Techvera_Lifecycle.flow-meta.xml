@@ -739,7 +739,490 @@
             </value>
         </assignmentItems>
         <connector>
+            <targetReference>Did_Get_Primary_Contact</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Sets varOCRContactId to the ContactId from the primary OCR so the GetPrimaryContact lookup can use it regardless of which OCR path was taken.</description>
+        <name>SetContactIdFromPrimaryOCR</name>
+        <label>Set Contact Id from Primary OCR</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>varOCRContactId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryOCR.ContactId</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>GetPrimaryContact</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Sets varOCRContactId to the ContactId from the first any-OCR fallback so the GetPrimaryContact lookup can use it. This runs when no primary OCR (IsPrimary=true) was found.</description>
+        <name>SetContactIdFromAnyOCR</name>
+        <label>Set Contact Id from Any OCR</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>varOCRContactId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetAnyOCR.ContactId</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>GetPrimaryContact</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Adds the BillToContactId field value to the Quote record reference so the Opportunity Contact Role's Contact is set as the bill-to contact when the Quote is created via PlaceSalesTransaction.</description>
+        <name>AddBillToContactFieldValue</name>
+        <label>Add BillTo Contact Field Value</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>billToContactIdRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>BillToContactId</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToContactIdRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryContact.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>quoteRecordReference.record.fieldValues</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>billToContactIdRecordMapWrapper</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
             <targetReference>SetGraphInput</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Sets the fields on the quote using the primary contact's mailing address for billing (CPQ-like behavior). Identical to SetQuoteFields except billing address fields use Contact.Mailing* instead of Account.Billing*. BillToContactId is set in the AddBillToContactFieldValue step that follows SetQuoteRecordReferenceValues.</description>
+        <name>SetQuoteFieldsContactBilling</name>
+        <label>Set Quote Fields (Contact Billing)</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>quoteNameRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Name</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>quoteNameRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>quoteName</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>opportunityRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>OpportunityId</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>opportunityRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetOpportunity.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>pricebookNameRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Pricebook2Id</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>pricebookNameRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPriceBookId.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>quoteStatusRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Status</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>quoteStatusRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Draft</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>commercialActionRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Commercial_Action__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>commercialActionRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>New Sale</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>legacyRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Legacy__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>legacyRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>salesTransactionTypeRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>SalesTransactionType</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>salesTransactionTypeRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>New Business</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalARRRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Total_ARR__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalARRRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>0</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalMRRRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Total_MRR__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalMRRRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>0</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>oneTimeTotalRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>One_Time_Total__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>oneTimeTotalRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>0</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totaldeltaARRRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Total_Delta_ARR__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totaldeltaARRRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>0</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recurringtotalRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Recurring_Total__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recurringtotalRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>0</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalrenewalARRRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Total_Renewal_ARR__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalrenewalARRRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>0</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalupforrrenewalARRRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Total_Up_For_Renewal_ARR__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>totalupforrrenewalARRRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>0</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>doesautomaticallyrenewRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>DoesAutomaticallyRenew__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>doesautomaticallyrenewRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>renewaldateRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Renewal_Date__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>renewaldateRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varnullDate</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>nextrenewaldateRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Next_Renewal_Date__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>nextrenewaldateRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varnullDate</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>hardwareorderRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>NEO_Hardware_Order__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>hardwareorderRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>containspartnersubscriptionsRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Contains_Partner_Subscriptions__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>containspartnersubscriptionsRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </assignmentItems>
+        <!-- Billing address from primary Contact's mailing address (CPQ-like) -->
+        <assignmentItems>
+            <assignToReference>billToStreetRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>BillingStreet__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToStreetRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryContact.MailingStreet</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToCityRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>BillingCity__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToCityRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryContact.MailingCity</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToStateRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>BillingState__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToStateRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryContact.MailingState</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToPostalCodeRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>BillingPostalCode__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToPostalCodeRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryContact.MailingPostalCode</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToCountryRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>BillingCountry__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>billToCountryRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryContact.MailingCountry</elementReference>
+            </value>
+        </assignmentItems>
+        <!-- Shipping address from Account (unchanged) -->
+        <assignmentItems>
+            <assignToReference>shipToStreetRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>ShippingStreet__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToStreetRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetOpportunity.Account.ShippingStreet</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToCityRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>ShippingCity__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToCityRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetOpportunity.Account.ShippingCity</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToStateRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>ShippingState__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToStateRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetOpportunity.Account.ShippingState</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToPostalCodeRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>ShippingPostalCode__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToPostalCodeRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetOpportunity.Account.ShippingPostalCode</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToCountryRecordMapWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>ShippingCountry__c</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>shipToCountryRecordMapWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetOpportunity.Account.ShippingCountry</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>SetQuoteRecordReferenceValues</targetReference>
         </connector>
     </assignments>
     <decisions>
@@ -763,6 +1246,84 @@
                 </rightValue>
             </conditions>
             <label>Success</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <description>Routes to add BillToContactId to the Quote record fieldValues when a primary Opportunity Contact Role's Contact was found. If no contact, the BillToContactId is not added to the POST payload.</description>
+        <name>Did_Get_Primary_Contact</name>
+        <label>Did Get Primary Contact?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>SetGraphInput</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No — Skip BillToContactId</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Set_BillToContactId</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>GetPrimaryContact.Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>AddBillToContactFieldValue</targetReference>
+            </connector>
+            <label>Yes — Add BillToContactId</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <description>Routes to SetQuoteFieldsContactBilling when the OCR Contact has a non-blank MailingStreet (i.e. has a mailing address to use for billing). Falls back to SetQuoteFields (Account.Billing*) when the contact has no mailing address or no contact was found at all.</description>
+        <name>Has_Primary_Contact</name>
+        <label>Contact Has Mailing Address?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>SetQuoteFields</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No — Use Account Billing</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Has_Primary_Contact</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>GetPrimaryContact.MailingStreet</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>SetQuoteFieldsContactBilling</targetReference>
+            </connector>
+            <label>Yes — Use Contact Billing</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <description>Routes to SetContactIdFromPrimaryOCR when a primary OCR (IsPrimary=true) was found. Falls back to GetAnyOCR when no primary OCR exists in this org, which is common when IsPrimary is not auto-checked.</description>
+        <name>Did_Get_Primary_OCR</name>
+        <label>Did Get Primary OCR?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>GetAnyOCR</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No — Try Any OCR</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Got_Primary_OCR</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>GetPrimaryOCR.Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>SetContactIdFromPrimaryOCR</targetReference>
+            </connector>
+            <label>Yes — Use Primary OCR</label>
         </rules>
     </decisions>
     <description>Creates Techvera - New Business Quotes</description>
@@ -815,7 +1376,7 @@
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>GetQuotesRelatedToOpportunity</targetReference>
+            <targetReference>GetPrimaryOCR</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -837,7 +1398,7 @@
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>SetQuoteFields</targetReference>
+            <targetReference>Has_Primary_Contact</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -874,6 +1435,79 @@
         <object>Quote</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <recordLookups>
+        <description>Fallback OCR lookup used when no primary OCR (IsPrimary=true) was found. Retrieves the first OpportunityContactRole for the Opportunity with no IsPrimary filter, so the associated Contact can still be used as the bill-to contact.</description>
+        <name>GetAnyOCR</name>
+        <label>Get Any Opportunity Contact Role (Fallback)</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>SetContactIdFromAnyOCR</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>OpportunityId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>GetOpportunity.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>OpportunityContactRole</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <description>Gets the Contact record for the OCR found (either the primary OCR or the first any-OCR fallback). Uses varOCRContactId which is populated by SetContactIdFromPrimaryOCR or SetContactIdFromAnyOCR. If no OCR had a ContactId this lookup returns null and billing falls back to Account.</description>
+        <name>GetPrimaryContact</name>
+        <label>Get Contact from OCR</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>GetQuotesRelatedToOpportunity</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varOCRContactId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Contact</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <description>Gets the primary OpportunityContactRole for the Opportunity (IsPrimary=true). If none is found the flow falls back to GetAnyOCR to try any OCR for the Opportunity.</description>
+        <name>GetPrimaryOCR</name>
+        <label>Get Primary Opportunity Contact Role</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Did_Get_Primary_OCR</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>OpportunityId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>GetOpportunity.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>IsPrimary</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>OpportunityContactRole</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <runInMode>DefaultMode</runInMode>
     <start>
         <locationX>0</locationX>
@@ -882,10 +1516,19 @@
             <targetReference>GetOpportunity</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
     <variables>
         <description>Sets the record map wrapper Apex-defined type that specifies the Quote.Bill To City (key) and value (object) for the quote. This variable is used to construct the Graph Apex-defined type input for the PlaceSalesTransaction invocable action.</description>
         <name>billToCityRecordMapWrapper</name>
+        <apexClass>RevSalesTrxn__RecordMapWrapper</apexClass>
+        <dataType>Apex</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Sets the record map wrapper Apex-defined type that specifies the Quote.BillToContactId (key) and value (object) for the Quote. Used only when a primary Opportunity Contact Role Contact is found; not included in the POST payload in the Account billing fallback path.</description>
+        <name>billToContactIdRecordMapWrapper</name>
         <apexClass>RevSalesTrxn__RecordMapWrapper</apexClass>
         <dataType>Apex</dataType>
         <isCollection>false</isCollection>
@@ -1237,6 +1880,14 @@
     <variables>
         <name>varnullDate</name>
         <dataType>Date</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Stores the ContactId from whichever OpportunityContactRole was resolved (primary OCR if found, otherwise the first any-OCR fallback). Used as the filter value for GetPrimaryContact.</description>
+        <name>varOCRContactId</name>
+        <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>

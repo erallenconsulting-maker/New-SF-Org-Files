@@ -115,6 +115,7 @@
             <targetReference>Subflow_Call_Successful</targetReference>
         </connector>
         <flowName>Update_Quote_Details_Techvera_Revenue_Rollups</flowName>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
         <inputAssignments>
             <name>quoteId</name>
             <value>
