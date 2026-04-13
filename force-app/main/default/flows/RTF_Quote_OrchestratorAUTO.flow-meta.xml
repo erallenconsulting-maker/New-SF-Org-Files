@@ -76,7 +76,7 @@
             <label>Successful?</label>
         </rules>
     </decisions>
-    <description>Golden Template for RLM Wrapper flow.</description>
+    <description>Record-triggered flow on Quote (after save, create only). When a Quote is created with an OpportunityId, checks the automation toggle then calls Create_Initial_Quote_Techvera_Lifecycle to create the initial Quote via the RLM lifecycle (sets billing/shipping address from the Account and other Quote defaults).</description>
     <environments>Default</environments>
     <interviewLabel>RTF Quote Orchestrator {!$Flow.CurrentDateTime}</interviewLabel>
     <label>RTF Quote Orchestrator</label>
@@ -127,9 +127,23 @@
         <connector>
             <targetReference>Automation_Toggles_mdt</targetReference>
         </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <description>Only run when the Quote is linked to an Opportunity so we can pass the Opportunity ID to the Create Initial Quote lifecycle flow.</description>
+            <field>OpportunityId</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>Quote</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerOrder>1</triggerOrder>
+        <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
     <subflows>
+        <description>Call the Create Initial Quote lifecycle autolaunched flow to initialize the Quote via the RLM PlaceSalesTransaction API. Passes the parent Opportunity ID so the flow can copy billing/shipping address fields from the Account and set other Quote-level defaults.</description>
         <name>Create_Initial_Quote_Techvera_Lifecycle</name>
         <label>Create Initial Quote Techvera Lifecycle</label>
         <locationX>0</locationX>
@@ -138,6 +152,12 @@
             <targetReference>Subflow_Call_Successful</targetReference>
         </connector>
         <flowName>Create_Initial_Quote_Techvera_Lifecycle</flowName>
+        <inputAssignments>
+            <name>opportunityID</name>
+            <value>
+                <elementReference>$Record.OpportunityId</elementReference>
+            </value>
+        </inputAssignments>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </subflows>
 </Flow>

@@ -244,6 +244,7 @@
         </filters>
         <object>Quote</object>
         <recordTriggerType>Update</recordTriggerType>
+        <triggerOrder>3</triggerOrder>
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>
