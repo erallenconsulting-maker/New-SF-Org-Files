@@ -2,120 +2,10 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>66.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-<<<<<<< HEAD
-    <assignments>
-        <description>Builds a new OrderItem record from the current QuoteLineItem and adds it to the collection for bulk creation.</description>
-        <name>Build_And_Add_OrderItem</name>
-        <label>Build and Add OrderItem to Collection</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <assignmentItems>
-            <assignToReference>newOrderItem.OrderId</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>orderId</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>newOrderItem.PricebookEntryId</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Loop_QuoteLineItems.PricebookEntryId</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>newOrderItem.Quantity</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Loop_QuoteLineItems.Quantity</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>newOrderItem.UnitPrice</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Loop_QuoteLineItems.UnitPrice</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>newOrderItemsCollection</assignToReference>
-            <operator>Add</operator>
-            <value>
-                <elementReference>newOrderItem</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Loop_QuoteLineItems</targetReference>
-        </connector>
-    </assignments>
-    <decisions>
-        <description>If OrderItems already exist for this Order, skip creation to prevent duplicates.</description>
-        <name>OrderItems_Already_Exist</name>
-        <label>OrderItems Already Exist?</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <defaultConnector>
-            <targetReference>Loop_QuoteLineItems</targetReference>
-        </defaultConnector>
-        <defaultConnectorLabel>No - Create OrderItems</defaultConnectorLabel>
-        <rules>
-            <name>Yes_OrderItems_Found</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>Get_Existing_OrderItems.Id</leftValueReference>
-                <operator>IsNull</operator>
-                <rightValue>
-                    <booleanValue>false</booleanValue>
-                </rightValue>
-            </conditions>
-            <label>Yes - Skip</label>
-        </rules>
-    </decisions>
-    <description>Autolaunched subflow that creates OrderItems from QuoteLineItems for a given Order. Accepts quoteId and orderId as inputs. Checks for existing OrderItems first to ensure idempotency.</description>
-=======
     <description>Subflow that pulls Quote Lines and makes them Order Products on the Order. This flow ensures Partner Subscription lines are removed from the Order Products to avoid syncing with NetSuite and double billing. Sets Contains_Partner_Subscriptions__c and Do_Not_Sync__c on the Order (and Quote) when partner subscription lines are present.</description>
->>>>>>> origin/main
     <environments>Default</environments>
     <interviewLabel>SUB Sync OrderItems From QuoteLines Techvera {!$Flow.CurrentDateTime}</interviewLabel>
     <label>SUB Sync OrderItems From QuoteLines Techvera</label>
-    <decisions>
-        <description>If no QuoteLineItems were found, skip the loop and end without creating OrderItems.</description>
-        <name>Has_QuoteLineItems</name>
-        <label>Has QuoteLineItems?</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <defaultConnectorLabel>No - End</defaultConnectorLabel>
-        <rules>
-            <name>Yes_Has_Items</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>Get_QuoteLineItems</leftValueReference>
-                <operator>IsNull</operator>
-                <rightValue>
-                    <booleanValue>false</booleanValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Get_Existing_OrderItems</targetReference>
-            </connector>
-            <label>Yes - Continue</label>
-        </rules>
-    </decisions>
-    <loops>
-        <description>Iterates over QuoteLineItems to build OrderItem records for bulk creation.</description>
-        <name>Loop_QuoteLineItems</name>
-        <label>Loop QuoteLineItems</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <collectionReference>Get_QuoteLineItems</collectionReference>
-        <iterationOrder>Asc</iterationOrder>
-        <nextValueConnector>
-            <targetReference>Build_And_Add_OrderItem</targetReference>
-        </nextValueConnector>
-        <noMoreValuesConnector>
-            <targetReference>Create_OrderItems</targetReference>
-        </noMoreValuesConnector>
-    </loops>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -135,20 +25,6 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-<<<<<<< HEAD
-    <recordCreates>
-        <description>Bulk creates all OrderItem records from the collection built during the loop.</description>
-        <name>Create_OrderItems</name>
-        <label>Create OrderItems</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <inputReference>newOrderItemsCollection</inputReference>
-    </recordCreates>
-    <recordLookups>
-        <description>Gets all QuoteLineItems for the given Quote to use as the source for OrderItem creation.</description>
-        <name>Get_QuoteLineItems</name>
-        <label>Get QuoteLineItems</label>
-=======
     <!-- ═══════════════════════════════════════════════════════════════
          VARIABLES — INPUT / OUTPUT
          ═══════════════════════════════════════════════════════════════ -->
@@ -207,49 +83,22 @@
         <description>Get the Quote record so we have access to Quote-level fields (e.g., Pricebook2Id) if needed.</description>
         <name>Get_Quote</name>
         <label>Get Quote</label>
->>>>>>> origin/main
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-<<<<<<< HEAD
-            <targetReference>Has_QuoteLineItems</targetReference>
-=======
             <targetReference>Get_QuoteLineItems</targetReference>
->>>>>>> origin/main
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>QuoteId</field>
+            <field>Id</field>
             <operator>EqualTo</operator>
             <value>
                 <elementReference>quoteId</elementReference>
             </value>
         </filters>
-        <getFirstRecordOnly>false</getFirstRecordOnly>
-        <object>QuoteLineItem</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordLookups>
-    <recordLookups>
-        <description>Checks if any OrderItems already exist for this Order to prevent duplicate creation.</description>
-        <name>Get_Existing_OrderItems</name>
-        <label>Get Existing OrderItems</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>OrderItems_Already_Exist</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>OrderId</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>orderId</elementReference>
-            </value>
-        </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>OrderItem</object>
+        <object>Quote</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
@@ -559,45 +408,8 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Get_QuoteLineItems</targetReference>
+            <targetReference>Get_Quote</targetReference>
         </connector>
     </start>
     <status>Active</status>
-<<<<<<< HEAD
-    <variables>
-        <description>Single OrderItem record used as a staging variable during the loop before adding to the collection.</description>
-        <name>newOrderItem</name>
-        <dataType>SObject</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-        <objectType>OrderItem</objectType>
-    </variables>
-    <variables>
-        <description>Collection of OrderItem records to be bulk-created after the loop completes.</description>
-        <name>newOrderItemsCollection</name>
-        <dataType>SObject</dataType>
-        <isCollection>true</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-        <objectType>OrderItem</objectType>
-    </variables>
-    <variables>
-        <description>The Salesforce ID of the Order to create OrderItems for. Required input.</description>
-        <name>orderId</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>true</isInput>
-        <isOutput>false</isOutput>
-    </variables>
-    <variables>
-        <description>The Salesforce ID of the Quote whose QuoteLineItems will be converted to OrderItems. Required input.</description>
-        <name>quoteId</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>true</isInput>
-        <isOutput>false</isOutput>
-    </variables>
-=======
->>>>>>> origin/main
 </Flow>
