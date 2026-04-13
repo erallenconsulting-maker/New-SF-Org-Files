@@ -74,6 +74,29 @@
     <environments>Default</environments>
     <interviewLabel>SUB Sync OrderItems From QuoteLines Techvera {!$Flow.CurrentDateTime}</interviewLabel>
     <label>SUB Sync OrderItems From QuoteLines Techvera</label>
+    <decisions>
+        <description>If no QuoteLineItems were found, skip the loop and end without creating OrderItems.</description>
+        <name>Has_QuoteLineItems</name>
+        <label>Has QuoteLineItems?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>No - End</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Has_Items</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_QuoteLineItems</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Get_Existing_OrderItems</targetReference>
+            </connector>
+            <label>Yes - Continue</label>
+        </rules>
+    </decisions>
     <loops>
         <description>Iterates over QuoteLineItems to build OrderItem records for bulk creation.</description>
         <name>Loop_QuoteLineItems</name>
@@ -124,7 +147,7 @@
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>Get_Existing_OrderItems</targetReference>
+            <targetReference>Has_QuoteLineItems</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
