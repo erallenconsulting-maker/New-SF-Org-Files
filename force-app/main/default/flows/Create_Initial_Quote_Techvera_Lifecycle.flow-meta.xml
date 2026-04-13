@@ -882,7 +882,7 @@
             <targetReference>GetOpportunity</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
     <variables>
         <description>Sets the record map wrapper Apex-defined type that specifies the Quote.Bill To City (key) and value (object) for the quote. This variable is used to construct the Graph Apex-defined type input for the PlaceSalesTransaction invocable action.</description>
         <name>billToCityRecordMapWrapper</name>

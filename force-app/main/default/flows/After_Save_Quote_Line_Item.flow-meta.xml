@@ -3,7 +3,7 @@
     <apiVersion>66.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
-        <description>Sets the errorMessage variable to the fault message from InvokePlaceSalesTransaction invocable action.</description>
+        <description>Sets the errorMessage variable to the error message returned from the Update Quote Details subflow, and marks isSuccess as false.</description>
         <name>Set_Error_Variable</name>
         <label>Set Error Variable</label>
         <locationX>0</locationX>
@@ -12,7 +12,7 @@
             <assignToReference>errorMessage</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>$Flow.FaultMessage</elementReference>
+                <elementReference>Call_Update_Quote_Details_Techvera_Revenue_Rollups_Flow.errorMessage</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -85,6 +85,9 @@
         <connector>
             <targetReference>Call_Update_Quote_Details_Techvera_Revenue_Rollups_Flow</targetReference>
         </connector>
+        <faultConnector>
+            <targetReference>Set_Error_Variable</targetReference>
+        </faultConnector>
         <flowName>Add_QuoteLineItem_to_Quote_Techvera_Lifecycle</flowName>
         <inputAssignments>
             <name>quoteId</name>
@@ -114,6 +117,9 @@
         <connector>
             <targetReference>Subflow_Call_Successful</targetReference>
         </connector>
+        <faultConnector>
+            <targetReference>Set_Error_Variable</targetReference>
+        </faultConnector>
         <flowName>Update_Quote_Details_Techvera_Revenue_Rollups</flowName>
         <inputAssignments>
             <name>quoteId</name>
@@ -121,6 +127,7 @@
                 <elementReference>$Record.QuoteId</elementReference>
             </value>
         </inputAssignments>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
     </subflows>
     <start>
         <locationX>0</locationX>
