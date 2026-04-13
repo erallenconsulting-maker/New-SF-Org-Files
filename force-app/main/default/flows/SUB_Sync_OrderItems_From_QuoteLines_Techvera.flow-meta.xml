@@ -249,6 +249,12 @@
             </value>
         </inputAssignments>
         <inputAssignments>
+            <field>Quote_Line_Item__c</field>
+            <value>
+                <elementReference>Loop_QuoteLineItems.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <field>Do_Not_Sync__c</field>
             <value>
                 <booleanValue>true</booleanValue>
