@@ -999,6 +999,9 @@
         </connector>
     </start>
     <status>Active</status>
+    <variables>
+        <description>Stores the error message that occurs when InvokePlaceSalesTransaction fails and is available as output from the flow.</description>
+        <name>errorMessage</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
