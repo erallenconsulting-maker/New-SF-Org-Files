@@ -743,7 +743,41 @@
         </connector>
     </assignments>
     <assignments>
-        <description>Adds the BillToContactId field value to the Quote record reference so the primary Opportunity Contact Role's Contact is set as the bill-to contact when the Quote is created via PlaceSalesTransaction.</description>
+        <description>Sets varOCRContactId to the ContactId from the primary OCR so the GetPrimaryContact lookup can use it regardless of which OCR path was taken.</description>
+        <name>SetContactIdFromPrimaryOCR</name>
+        <label>Set Contact Id from Primary OCR</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>varOCRContactId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetPrimaryOCR.ContactId</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>GetPrimaryContact</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Sets varOCRContactId to the ContactId from the first any-OCR fallback so the GetPrimaryContact lookup can use it. This runs when no primary OCR (IsPrimary=true) was found.</description>
+        <name>SetContactIdFromAnyOCR</name>
+        <label>Set Contact Id from Any OCR</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>varOCRContactId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>GetAnyOCR.ContactId</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>GetPrimaryContact</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Adds the BillToContactId field value to the Quote record reference so the Opportunity Contact Role's Contact is set as the bill-to contact when the Quote is created via PlaceSalesTransaction.</description>
         <name>AddBillToContactFieldValue</name>
         <label>Add BillTo Contact Field Value</label>
         <locationX>0</locationX>
@@ -1241,9 +1275,9 @@
         </rules>
     </decisions>
     <decisions>
-        <description>Routes to SetQuoteFieldsContactBilling (primary contact's mailing address for billing) when a primary OCR Contact was found; otherwise falls back to SetQuoteFields (Account billing address).</description>
+        <description>Routes to SetQuoteFieldsContactBilling when the OCR Contact has a non-blank MailingStreet (i.e. has a mailing address to use for billing). Falls back to SetQuoteFields (Account.Billing*) when the contact has no mailing address or no contact was found at all.</description>
         <name>Has_Primary_Contact</name>
-        <label>Has Primary Contact?</label>
+        <label>Contact Has Mailing Address?</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <defaultConnector>
@@ -1254,7 +1288,7 @@
             <name>Yes_Has_Primary_Contact</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>GetPrimaryContact.Id</leftValueReference>
+                <leftValueReference>GetPrimaryContact.MailingStreet</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>false</booleanValue>
@@ -1264,6 +1298,32 @@
                 <targetReference>SetQuoteFieldsContactBilling</targetReference>
             </connector>
             <label>Yes — Use Contact Billing</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <description>Routes to SetContactIdFromPrimaryOCR when a primary OCR (IsPrimary=true) was found. Falls back to GetAnyOCR when no primary OCR exists in this org, which is common when IsPrimary is not auto-checked.</description>
+        <name>Did_Get_Primary_OCR</name>
+        <label>Did Get Primary OCR?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>GetAnyOCR</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No — Try Any OCR</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Got_Primary_OCR</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>GetPrimaryOCR.Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>SetContactIdFromPrimaryOCR</targetReference>
+            </connector>
+            <label>Yes — Use Primary OCR</label>
         </rules>
     </decisions>
     <description>Creates Techvera - New Business Quotes</description>
@@ -1376,9 +1436,31 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
-        <description>Gets the primary Contact record linked through the primary OpportunityContactRole. Used to set Quote.BillToContactId and billing address fields (CPQ-like behavior). If no contact is found all billing fields fall back to Account.Billing* in the SetQuoteFields branch.</description>
+        <description>Fallback OCR lookup used when no primary OCR (IsPrimary=true) was found. Retrieves the first OpportunityContactRole for the Opportunity with no IsPrimary filter, so the associated Contact can still be used as the bill-to contact.</description>
+        <name>GetAnyOCR</name>
+        <label>Get Any Opportunity Contact Role (Fallback)</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>SetContactIdFromAnyOCR</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>OpportunityId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>GetOpportunity.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>OpportunityContactRole</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <description>Gets the Contact record for the OCR found (either the primary OCR or the first any-OCR fallback). Uses varOCRContactId which is populated by SetContactIdFromPrimaryOCR or SetContactIdFromAnyOCR. If no OCR had a ContactId this lookup returns null and billing falls back to Account.</description>
         <name>GetPrimaryContact</name>
-        <label>Get Primary Contact</label>
+        <label>Get Contact from OCR</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
@@ -1390,7 +1472,7 @@
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>GetPrimaryOCR.ContactId</elementReference>
+                <elementReference>varOCRContactId</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
@@ -1398,14 +1480,14 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
-        <description>Gets the primary OpportunityContactRole for the Opportunity so the associated Contact can be used as the Quote bill-to contact (CPQ-like behavior). If no primary OCR exists the Contact lookup returns null and the flow falls back to Account billing.</description>
+        <description>Gets the primary OpportunityContactRole for the Opportunity (IsPrimary=true). If none is found the flow falls back to GetAnyOCR to try any OCR for the Opportunity.</description>
         <name>GetPrimaryOCR</name>
         <label>Get Primary Opportunity Contact Role</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>GetPrimaryContact</targetReference>
+            <targetReference>Did_Get_Primary_OCR</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -1798,6 +1880,14 @@
     <variables>
         <name>varnullDate</name>
         <dataType>Date</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Stores the ContactId from whichever OpportunityContactRole was resolved (primary OCR if found, otherwise the first any-OCR fallback). Used as the filter value for GetPrimaryContact.</description>
+        <name>varOCRContactId</name>
+        <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
