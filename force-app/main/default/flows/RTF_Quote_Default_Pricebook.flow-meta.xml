@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <description>Set Quote.Pricebook2Id from the related Opportunity pricebook when present.</description>
+        <name>Set_Pricebook_From_Opportunity</name>
+        <label>Set Pricebook From Opportunity</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Pricebook2Id</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Opportunity.Pricebook2Id</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <assignments>
+        <description>Set Quote.Pricebook2Id to the Standard Price Book when neither the Quote nor the Opportunity have a pricebook set.</description>
+        <name>Set_Pricebook_From_Standard</name>
+        <label>Set Pricebook From Standard</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Pricebook2Id</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Standard_Pricebook.Id</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <decisions>
+        <description>Check if the related Opportunity has a pricebook set. If yes, inherit it. Otherwise fall back to the Standard Price Book.</description>
+        <name>Opportunity_Has_Pricebook</name>
+        <label>Opportunity Has Pricebook?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Get_Standard_Pricebook</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No — Use Standard</defaultConnectorLabel>
+        <rules>
+            <name>Has_Opp_Pricebook</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Opportunity.Pricebook2Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Set_Pricebook_From_Opportunity</targetReference>
+            </connector>
+            <label>Yes — Inherit from Opportunity</label>
+        </rules>
+    </decisions>
+    <description>Before-save record-triggered flow on Quote (Create). When Quote.Pricebook2Id is blank at creation, defaults it to Opportunity.Pricebook2Id when present, or to the Standard Price Book as a fallback. This ensures the Quote Lines UI shows products without requiring manual pricebook selection.</description>
+    <environments>Default</environments>
+    <interviewLabel>RTF Quote Default Pricebook {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>RTF Quote Default Pricebook</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <description>Retrieve the Opportunity linked to this Quote so we can inherit its pricebook when set.</description>
+        <name>Get_Opportunity</name>
+        <label>Get Opportunity</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Opportunity_Has_Pricebook</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.OpportunityId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Opportunity</object>
+        <queriedFields>Id</queriedFields>
+        <queriedFields>Pricebook2Id</queriedFields>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <description>Get the Standard Price Book to use as a fallback when neither the Quote nor the Opportunity have a pricebook set. The standard pricebook always has IsStandard = true.</description>
+        <name>Get_Standard_Pricebook</name>
+        <label>Get Standard Pricebook</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Set_Pricebook_From_Standard</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>IsStandard</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Pricebook2</object>
+        <queriedFields>Id</queriedFields>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Opportunity</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Pricebook2Id</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>Quote</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>
