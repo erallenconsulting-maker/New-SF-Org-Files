@@ -8,9 +8,9 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <defaultConnector>
-            <targetReference>Call_Create_Orders_Auto_Flow</targetReference>
+            <targetReference>Call_Update_Quote_Details_Revenue_Rollups</targetReference>
         </defaultConnector>
-        <defaultConnectorLabel>Else</defaultConnectorLabel>
+        <defaultConnectorLabel>Else — Run Rollups</defaultConnectorLabel>
         <rules>
             <name>End</name>
             <conditionLogic>or</conditionLogic>
@@ -31,7 +31,7 @@
             <label>End</label>
         </rules>
     </decisions>
-    <description>Quote Flow to trigger autolaunch flows for RLM billing.</description>
+    <description>Record-triggered flow on Quote (after save, create and update). Fires when Quote Status changes to Accepted or Approved. Checks the automation toggle, then calls Update_Quote_Details_Techvera_Revenue_Rollups to ensure all revenue rollup totals on the Quote are current before the Order is created by After_Save_Quote_Create_Order_Safe.</description>
     <environments>Default</environments>
     <interviewLabel>RTF_Quote_Start_Techvera_Lifecycle {!$Flow.CurrentDateTime}</interviewLabel>
     <label>RTF Quote Start Techvera Lifecycle</label>
@@ -76,6 +76,20 @@
         <object>Automation_Toggles__mdt</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <subflows>
+        <description>Ensure Quote revenue totals (ARR, MRR, One-Time, Contains_Partner_Subscriptions__c, etc.) are up-to-date on the Quote at the moment of approval/acceptance. This runs before After_Save_Quote_Create_Order_Safe creates the Order so the Order can be created with accurate Quote data.</description>
+        <name>Call_Update_Quote_Details_Revenue_Rollups</name>
+        <label>Call Update Quote Details Revenue Rollups</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <flowName>Update_Quote_Details_Techvera_Revenue_Rollups</flowName>
+        <inputAssignments>
+            <name>quoteId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+    </subflows>
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
@@ -108,34 +122,5 @@
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
-    <subflows>
-        <name>Call_Create_Orders_Auto_Flow</name>
-        <label>Call Create Orders Auto Flow</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <connector>
-            <targetReference>Call_Subflow_for_Order_Items</targetReference>
-        </connector>
-        <flowName>Auto_Create_Orders_From_Quotes_Techvera_Lifecycle</flowName>
-        <inputAssignments>
-            <name>quoteId</name>
-            <value>
-                <elementReference>$Record.Id</elementReference>
-            </value>
-        </inputAssignments>
-    </subflows>
-    <subflows>
-        <name>Call_Subflow_for_Order_Items</name>
-        <label>Call Subflow for Order Items</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <flowName>SUB_Sync_OrderItems_From_QuoteLines_Techvera</flowName>
-        <inputAssignments>
-            <name>quoteId</name>
-            <value>
-                <elementReference>$Record.Id</elementReference>
-            </value>
-        </inputAssignments>
-    </subflows>
+    <status>Active</status>
 </Flow>

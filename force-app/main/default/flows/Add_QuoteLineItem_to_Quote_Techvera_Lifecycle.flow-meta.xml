@@ -2351,7 +2351,7 @@
             <targetReference>IsProductSellingModelIdNull</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
     <variables>
         <description>Stores the record map wrapper Apex-defined type that specifies the QuoteLineItem.ARR__c field name (key) and value (object) for the quote. This variable is used to construct the Graph Apex-defined type input for the PlaceSalesTransaction invocable action.</description>
         <name>ARRRecordMapWrapper</name>

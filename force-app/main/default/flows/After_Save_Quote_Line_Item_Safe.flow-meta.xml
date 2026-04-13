@@ -141,9 +141,17 @@
                 <booleanValue>false</booleanValue>
             </value>
         </filters>
+        <filters>
+            <description>Recursion guard: do not re-fire when the Billing Schedule has already been derived by this flow, preventing an infinite update loop.</description>
+            <field>Billing_Schedule_Status__c</field>
+            <operator>NotEqualTo</operator>
+            <value>
+                <stringValue>Derived</stringValue>
+            </value>
+        </filters>
         <object>QuoteLineItem</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
 </Flow>

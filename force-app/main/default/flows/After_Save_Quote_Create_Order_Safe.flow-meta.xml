@@ -2,6 +2,7 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>66.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+<<<<<<< HEAD
     <decisions>
         <description>If an Order already exists for this Quote, stop to avoid creating a duplicate.</description>
         <name>Order_Already_Exists</name>
@@ -26,6 +27,9 @@
         </rules>
     </decisions>
     <description>Record-triggered after-save flow on Quote update. When Status becomes Approved or Accepted and Ordered__c is false, creates a new Order (linked via Order.QuoteId) and OrderItems from QuoteLineItems, then sets Quote.Ordered__c = true to prevent re-creation.</description>
+=======
+    <description>Record-triggered flow on Quote (after save, update). When Quote Status becomes Approved or Accepted and Ordered__c = false, creates one Order linked via Order.QuoteId and calls the OrderItem sync subflow. Sets Ordered__c = true on the Quote after Order creation to prevent duplicate Orders.</description>
+>>>>>>> origin/main
     <environments>Default</environments>
     <interviewLabel>After_Save_Quote_Create_Order_Safe {!$Flow.CurrentDateTime}</interviewLabel>
     <label>After_Save_Quote_Create_Order_Safe</label>
@@ -48,6 +52,7 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
+<<<<<<< HEAD
     <recordCreates>
         <description>Creates a new Order linked to the approved/accepted Quote.</description>
         <name>Create_Order</name>
@@ -94,11 +99,33 @@
         <description>Looks for an existing Order linked to this Quote to prevent duplicate creation.</description>
         <name>Get_Order_for_Quote</name>
         <label>Get Order for Quote</label>
+=======
+    <!-- ═══════════════════════════════════════════════════════════════
+         FORMULA VARIABLES
+         ═══════════════════════════════════════════════════════════════ -->
+    <formulas>
+        <description>Effective date for the Order: uses Quote StartDate if populated, otherwise falls back to today.</description>
+        <name>frmEffectiveDate</name>
+        <dataType>Date</dataType>
+        <expression>IF(ISBLANK({!$Record.StartDate}), TODAY(), {!$Record.StartDate})</expression>
+    </formulas>
+    <!-- ═══════════════════════════════════════════════════════════════
+         RECORD LOOKUPS
+         ═══════════════════════════════════════════════════════════════ -->
+    <recordLookups>
+        <description>Check whether an Order already exists for this Quote to prevent duplicates.</description>
+        <name>Get_Order_s_for_this_Quote</name>
+        <label>Get Order(s) for this Quote</label>
+>>>>>>> origin/main
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
+<<<<<<< HEAD
             <targetReference>Order_Already_Exists</targetReference>
+=======
+            <targetReference>Did_Order_Already_Exist</targetReference>
+>>>>>>> origin/main
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -112,10 +139,147 @@
         <object>Order</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+<<<<<<< HEAD
     <recordUpdates>
         <description>Marks the Quote as Ordered to prevent re-creation of Order on future updates.</description>
         <name>Update_Quote_Ordered</name>
         <label>Update Quote Ordered__c = true</label>
+=======
+    <!-- ═══════════════════════════════════════════════════════════════
+         DECISIONS
+         ═══════════════════════════════════════════════════════════════ -->
+    <decisions>
+        <description>If an Order already exists for this Quote, stop processing to prevent duplicate Order creation.</description>
+        <name>Did_Order_Already_Exist</name>
+        <label>Did Order Already Exist?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Create_Order</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No — Create Order</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Order_Exists</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Order_s_for_this_Quote.Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <label>Yes — Stop</label>
+        </rules>
+    </decisions>
+    <!-- ═══════════════════════════════════════════════════════════════
+         RECORD CREATES
+         ═══════════════════════════════════════════════════════════════ -->
+    <recordCreates>
+        <description>Create a new Order linked to this Quote. QuoteId links Order to Quote for sync. Status is Draft; BillingAddress is copied from Quote.</description>
+        <name>Create_Order</name>
+        <label>Create Order</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Call_Sync_OrderItems</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>AccountId</field>
+            <value>
+                <elementReference>$Record.AccountId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>BillingCity</field>
+            <value>
+                <elementReference>$Record.BillingCity</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>BillingCountry</field>
+            <value>
+                <elementReference>$Record.BillingCountry</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>BillingPostalCode</field>
+            <value>
+                <elementReference>$Record.BillingPostalCode</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>BillingState</field>
+            <value>
+                <elementReference>$Record.BillingState</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>BillingStreet</field>
+            <value>
+                <elementReference>$Record.BillingStreet</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>EffectiveDate</field>
+            <value>
+                <elementReference>frmEffectiveDate</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Pricebook2Id</field>
+            <value>
+                <elementReference>$Record.Pricebook2Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>QuoteId</field>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value>
+                <stringValue>Draft</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Order</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <!-- ═══════════════════════════════════════════════════════════════
+         SUBFLOWS
+         ═══════════════════════════════════════════════════════════════ -->
+    <subflows>
+        <description>Call the OrderItem sync subflow. Passes both quoteId and the newly created orderId. The subflow loops over QuoteLineItems, skips Partner Subscription lines, creates OrderItems for all other lines, and sets Contains_Partner_Subscriptions__c / Do_Not_Sync__c on the Order and Quote when partner subscriptions are present.</description>
+        <name>Call_Sync_OrderItems</name>
+        <label>Call Sync OrderItems</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Update_Quote_Ordered</targetReference>
+        </connector>
+        <flowName>SUB_Sync_OrderItems_From_QuoteLines_Techvera</flowName>
+        <inputAssignments>
+            <name>quoteId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>orderId</name>
+            <value>
+                <elementReference>Create_Order</elementReference>
+            </value>
+        </inputAssignments>
+    </subflows>
+    <!-- ═══════════════════════════════════════════════════════════════
+         RECORD UPDATES
+         ═══════════════════════════════════════════════════════════════ -->
+    <recordUpdates>
+        <description>Mark the Quote as Ordered so this flow does not fire again for the same Quote.</description>
+        <name>Update_Quote_Ordered</name>
+        <label>Update Quote Ordered</label>
+>>>>>>> origin/main
         <locationX>0</locationX>
         <locationY>0</locationY>
         <filterLogic>and</filterLogic>
@@ -134,6 +298,12 @@
         </inputAssignments>
         <object>Quote</object>
     </recordUpdates>
+<<<<<<< HEAD
+=======
+    <!-- ═══════════════════════════════════════════════════════════════
+         START
+         ═══════════════════════════════════════════════════════════════ -->
+>>>>>>> origin/main
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
@@ -167,6 +337,7 @@
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>
+<<<<<<< HEAD
     <subflows>
         <description>Calls the subflow to create OrderItems from QuoteLineItems for the newly created Order.</description>
         <name>SUB_Sync_OrderItems</name>
@@ -190,4 +361,6 @@
             </value>
         </inputAssignments>
     </subflows>
+=======
+>>>>>>> origin/main
 </Flow>

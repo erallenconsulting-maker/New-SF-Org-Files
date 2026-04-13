@@ -24,7 +24,7 @@
         </assignmentItems>
     </assignments>
     <decisions>
-        <description>Ensures that if the subflow wasn&apos;t successfully triggered, Salesforce Admin should receive an error message.</description>
+        <description>Ensures that if the Update Quote Details subflow wasn&apos;t successfully triggered, Salesforce Admin should receive an error message.</description>
         <name>Subflow_Call_Successful</name>
         <label>Subflow Call Successful?</label>
         <locationX>0</locationX>
@@ -46,7 +46,7 @@
             <label>Successful?</label>
         </rules>
     </decisions>
-    <description>Record-triggered flow on Quote Line Item that runs after save.</description>
+    <description>Record-triggered flow on Quote Line Item that runs after save. Invokes Add_QuoteLineItem_to_Quote_Techvera_Lifecycle to process the line item lifecycle, then calls Update_Quote_Details_Techvera_Revenue_Rollups to roll up revenue totals to the parent Quote.</description>
     <environments>Default</environments>
     <interviewLabel>After Save {!$Flow.CurrentDateTime}</interviewLabel>
     <label>After Save - Quote Line Item</label>
@@ -69,11 +69,64 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-    <start>
+    <!-- ═══════════════════════════════════════════════════════════════
+         SUBFLOWS — called in sequence
+         1. Add_QuoteLineItem_to_Quote_Techvera_Lifecycle
+            → processes the QLI through the CPQ lifecycle (revenue calcs, billing schedule, etc.)
+         2. Update_Quote_Details_Techvera_Revenue_Rollups
+            → rolls up all QLI revenue values to the parent Quote
+         ═══════════════════════════════════════════════════════════════ -->
+    <subflows>
+        <description>Call the Add QuoteLineItem lifecycle autolaunched flow to process the QuoteLineItem through the revenue lifecycle. Passes key QLI fields; the flow handles null productSellingModelID gracefully.</description>
+        <name>Call_Add_QuoteLineItem_to_Quote_Lifecycle_Flow</name>
+        <label>Call Add QuoteLineItem to Quote Lifecycle Flow</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Call_Update_Quote_Details_Techvera_Revenue_Rollups_Flow</targetReference>
+        </connector>
+        <flowName>Add_QuoteLineItem_to_Quote_Techvera_Lifecycle</flowName>
+        <inputAssignments>
+            <name>quoteId</name>
+            <value>
+                <elementReference>$Record.QuoteId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>productId</name>
+            <value>
+                <elementReference>$Record.Product2Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>quantity</name>
+            <value>
+                <elementReference>$Record.Quantity</elementReference>
+            </value>
+        </inputAssignments>
+    </subflows>
+    <subflows>
+        <description>Call the revenue rollup autolaunched flow to recalculate Quote-level revenue totals (ARR, MRR, One-Time, etc.) after this QuoteLineItem was saved.</description>
+        <name>Call_Update_Quote_Details_Techvera_Revenue_Rollups_Flow</name>
+        <label>Call Update Quote Details Techvera Revenue Rollups Flow</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Subflow_Call_Successful</targetReference>
+        </connector>
+        <flowName>Update_Quote_Details_Techvera_Revenue_Rollups</flowName>
+        <inputAssignments>
+            <name>quoteId</name>
+            <value>
+                <elementReference>$Record.QuoteId</elementReference>
+            </value>
+        </inputAssignments>
+    </subflows>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Call_Add_QuoteLineItem_to_Quote_Lifecycle_Flow</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -87,7 +140,7 @@
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>InvalidDraft</status>
+    <status>Active</status>
     <variables>
         <description>Stores the error message that occurs when InvokePlaceSalesTransaction fails and is available as output from the flow.</description>
         <name>errorMessage</name>
