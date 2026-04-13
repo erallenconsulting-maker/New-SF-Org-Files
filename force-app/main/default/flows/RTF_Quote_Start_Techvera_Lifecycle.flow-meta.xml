@@ -120,6 +120,7 @@
         </filters>
         <object>Quote</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerOrder>1</triggerOrder>
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>

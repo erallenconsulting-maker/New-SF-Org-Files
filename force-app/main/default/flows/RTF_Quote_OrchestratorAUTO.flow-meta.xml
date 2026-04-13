@@ -3,23 +3,23 @@
     <apiVersion>66.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
-        <description>Sets the errorMessage variable to the fault message from InvokePlaceSalesTransaction invocable action.</description>
+        <description>Stores a failure indicator and the fault/error message into local flow variables when the Create Initial Quote subflow does not succeed.</description>
         <name>Set_Error_Variable</name>
         <label>Set Error Variable</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignmentItems>
-            <assignToReference>Create_Initial_Quote_Techvera_Lifecycle.isSuccess</assignToReference>
+            <assignToReference>isSuccess</assignToReference>
             <operator>Assign</operator>
             <value>
                 <booleanValue>false</booleanValue>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>Create_Initial_Quote_Techvera_Lifecycle.errorMessage</assignToReference>
+            <assignToReference>errorMessage</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>$Flow.FaultMessage</elementReference>
+                <elementReference>Create_Initial_Quote_Techvera_Lifecycle.errorMessage</elementReference>
             </value>
         </assignmentItems>
     </assignments>
@@ -76,7 +76,7 @@
             <label>Successful?</label>
         </rules>
     </decisions>
-    <description>Golden Template for RLM Wrapper flow.</description>
+    <description>Record-triggered flow on Quote (after save, create only). Checks the automation toggle, then calls Create_Initial_Quote_Techvera_Lifecycle to set up initial Quote fields (including address fields from the related Account/Opportunity) whenever a new Quote record is created.</description>
     <environments>Default</environments>
     <interviewLabel>RTF Quote Orchestrator {!$Flow.CurrentDateTime}</interviewLabel>
     <label>RTF Quote Orchestrator</label>
@@ -127,8 +127,11 @@
         <connector>
             <targetReference>Automation_Toggles_mdt</targetReference>
         </connector>
+        <object>Quote</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
     <subflows>
         <name>Create_Initial_Quote_Techvera_Lifecycle</name>
         <label>Create Initial Quote Techvera Lifecycle</label>
@@ -137,7 +140,44 @@
         <connector>
             <targetReference>Subflow_Call_Successful</targetReference>
         </connector>
+        <faultConnector>
+            <targetReference>Set_Error_Variable</targetReference>
+        </faultConnector>
         <flowName>Create_Initial_Quote_Techvera_Lifecycle</flowName>
+        <inputAssignments>
+            <name>opportunityID</name>
+            <value>
+                <elementReference>$Record.OpportunityId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>quoteName</name>
+            <value>
+                <elementReference>$Record.Name</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <name>priceBookName</name>
+            <value>
+                <elementReference>$Record.Pricebook2.Name</elementReference>
+            </value>
+        </inputAssignments>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </subflows>
+    <variables>
+        <description>Stores the error message when Create_Initial_Quote_Techvera_Lifecycle does not succeed.</description>
+        <name>errorMessage</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Indicates whether Create_Initial_Quote_Techvera_Lifecycle completed successfully.</description>
+        <name>isSuccess</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
 </Flow>
