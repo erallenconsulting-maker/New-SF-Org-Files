@@ -129,7 +129,6 @@
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
-            <description>Only run when the Quote is linked to an Opportunity so we can pass the Opportunity ID to the Create Initial Quote lifecycle flow.</description>
             <field>OpportunityId</field>
             <operator>IsNull</operator>
             <value>
@@ -138,7 +137,6 @@
         </filters>
         <object>Quote</object>
         <recordTriggerType>Create</recordTriggerType>
-        <triggerOrder>1</triggerOrder>
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>

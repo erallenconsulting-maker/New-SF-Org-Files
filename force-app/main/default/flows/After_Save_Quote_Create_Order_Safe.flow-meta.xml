@@ -164,6 +164,23 @@
          SUBFLOWS
          ═══════════════════════════════════════════════════════════════ -->
     <subflows>
+        <description>Ensure Quote revenue totals (ARR, MRR, One-Time, etc.) are current before Order creation runs. Passes the Quote ID to the revenue rollup autolaunched flow.</description>
+        <name>Call_Revenue_Rollups_Before_Order</name>
+        <label>Call Revenue Rollups Before Order</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Order_s_for_this_Quote</targetReference>
+        </connector>
+        <flowName>Update_Quote_Details_Techvera_Revenue_Rollups</flowName>
+        <inputAssignments>
+            <name>quoteId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+    </subflows>
+    <subflows>
         <description>Call the OrderItem sync subflow. Passes both quoteId and the newly created orderId. The subflow loops over QuoteLineItems, skips Partner Subscription lines, creates OrderItems for all other lines, and sets Contains_Partner_Subscriptions__c / Do_Not_Sync__c on the Order and Quote when partner subscriptions are present.</description>
         <name>Call_Sync_OrderItems</name>
         <label>Call Sync OrderItems</label>
@@ -218,7 +235,7 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Get_Order_s_for_this_Quote</targetReference>
+            <targetReference>Call_Revenue_Rollups_Before_Order</targetReference>
         </connector>
         <filterLogic>((1 OR 2) AND 3)</filterLogic>
         <filters>
@@ -244,7 +261,6 @@
         </filters>
         <object>Quote</object>
         <recordTriggerType>Update</recordTriggerType>
-        <triggerOrder>3</triggerOrder>
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>
