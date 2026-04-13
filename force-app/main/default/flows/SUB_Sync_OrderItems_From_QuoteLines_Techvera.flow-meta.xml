@@ -225,6 +225,44 @@
         </rules>
     </decisions>
     <!-- ═══════════════════════════════════════════════════════════════
+         RECORD CREATES — Partner Subscription
+         ═══════════════════════════════════════════════════════════════ -->
+    <recordCreates>
+        <description>Create a Partner_Subscription__c record for this Quote Line Item so it appears in the Partner Subscriptions related list with Do_Not_Sync__c = true. This prevents the Pax8 billing integration from double-billing the partner subscription product. OrderItem is NOT created for this line.</description>
+        <name>Create_Partner_Subscription_Rec</name>
+        <label>Create Partner Subscription Record</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Loop_QuoteLineItems</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>Order__c</field>
+            <value>
+                <elementReference>orderId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Quote__c</field>
+            <value>
+                <elementReference>quoteId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Quote_Line_Item__c</field>
+            <value>
+                <elementReference>Loop_QuoteLineItems.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Do_Not_Sync__c</field>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputAssignments>
+        <object>Partner_Subscription__c</object>
+    </recordCreates>
+    <!-- ═══════════════════════════════════════════════════════════════
          ASSIGNMENTS
          ═══════════════════════════════════════════════════════════════ -->
     <assignments>
@@ -241,7 +279,7 @@
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>Loop_QuoteLineItems</targetReference>
+            <targetReference>Create_Partner_Subscription_Rec</targetReference>
         </connector>
     </assignments>
     <assignments>

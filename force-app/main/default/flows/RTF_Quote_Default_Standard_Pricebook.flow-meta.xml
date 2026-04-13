@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <description>Set the Quote Pricebook2Id to the Standard Price Book so reps can add Quote Line Items without hitting a blank pricebook error.</description>
+        <name>Set_Quote_Pricebook</name>
+        <label>Set Quote Pricebook</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Pricebook2Id</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Standard_Pricebook.Id</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <description>Record-triggered Before Save flow on Quote (create and update). Always sets Pricebook2Id to the Standard Price Book to ensure Quote Line Items can be added. Since only one Standard Price Book exists in the org, this guarantees the pricebook is always populated.</description>
+    <environments>Default</environments>
+    <interviewLabel>RTF Quote Default Standard Pricebook {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>RTF Quote Default Standard Pricebook</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <description>Retrieve the one Standard Price Book in the org. IsStandard = true uniquely identifies it.</description>
+        <name>Get_Standard_Pricebook</name>
+        <label>Get Standard Pricebook</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Set_Quote_Pricebook</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>IsStandard</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Pricebook2</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Standard_Pricebook</targetReference>
+        </connector>
+        <object>Quote</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>
