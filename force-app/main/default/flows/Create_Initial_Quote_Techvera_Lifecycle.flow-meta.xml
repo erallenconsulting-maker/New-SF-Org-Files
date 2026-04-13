@@ -82,7 +82,7 @@
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>GetPriceBookId</targetReference>
+            <targetReference>SetQuoteFields</targetReference>
         </connector>
     </assignments>
     <assignments>
@@ -117,20 +117,6 @@
             <operator>Assign</operator>
             <value>
                 <elementReference>GetOpportunity.Id</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>pricebookNameRecordMapWrapper.key</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <stringValue>Pricebook2Id</stringValue>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>pricebookNameRecordMapWrapper.obj</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>GetPriceBookId.Id</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -546,13 +532,6 @@
             <assignToReference>quoteRecordReference.record.fieldValues</assignToReference>
             <operator>Add</operator>
             <value>
-                <elementReference>pricebookNameRecordMapWrapper</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>quoteRecordReference.record.fieldValues</assignToReference>
-            <operator>Add</operator>
-            <value>
                 <elementReference>quoteStatusRecordMapWrapper</elementReference>
             </value>
         </assignmentItems>
@@ -827,29 +806,6 @@
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>Opportunity</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordLookups>
-    <recordLookups>
-        <description>Gets the ID of the price book record with a name that matches the priceBookName passed into the flow. Stores the ID of the result in the Price Book from Get Price Book ID record variable.</description>
-        <name>GetPriceBookId</name>
-        <label>Get Price Book Id</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>SetQuoteFields</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Name</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>priceBookName</elementReference>
-            </value>
-        </filters>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>Pricebook2</object>
-        <queriedFields>Id</queriedFields>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
