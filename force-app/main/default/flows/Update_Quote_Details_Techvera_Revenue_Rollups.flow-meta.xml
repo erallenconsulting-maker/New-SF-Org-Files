@@ -998,7 +998,7 @@
             <targetReference>Get_Quote</targetReference>
         </connector>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
     <variables>
         <description>Stores the error message that occurs when InvokePlaceSalesTransaction fails and is available as output from the flow.</description>
         <name>errorMessage</name>
